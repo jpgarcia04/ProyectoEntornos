@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.lorenzo.pr4entornos;
 
 import java.util.ArrayList;
@@ -12,72 +8,102 @@ import java.util.ArrayList;
  */
 public class Cajero {
 
-    String n;
-    int c;
-    double t;
-    ArrayList<Producto> ps;
+    private static final double IVA = 0.21;
 
-    public Cajero(String n) {
-        this.n = n;
-        this.c = 0;
-        this.t = 0;
-        this.ps = new ArrayList<>();
+    private String nombreCajero;
+    private int ticketsEmitidos;
+    private double totalDia;
+    private ArrayList<Producto> productos;
+
+    public Cajero(String nombreCajero) {
+        this.nombreCajero = nombreCajero;
+        this.ticketsEmitidos = 0;
+        this.totalDia = 0;
+        this.productos = new ArrayList<>();
     }
 
-    public void ANADIRPRODUCTO(Producto p) {
-        ps.add(p);
+    public void anadirProducto(Producto producto) {
+        productos.add(producto);
     }
 
-    public void eliminarProDUCTO(Producto p) {
-        ps.remove(p);
+    public void eliminarProducto(Producto producto) {
+        productos.remove(producto);
     }
 
     public void cobrar() {
-        double subt = 0;
-        for (Producto p : ps) {
-            subt = subt + p.calcularImporte();
-        }
-        double iva = subt * 0.21;
-        double tot = subt + iva;
+        double subtotal = calcularSubtotal();
+        double iva = calcularIva(subtotal);
+        double total = calcularTotal(subtotal, iva);
 
+        imprimirTicket(subtotal, iva, total);
+        registrarVenta(total);
+        productos.clear();
+    }
+
+    private double calcularSubtotal() {
+        double subtotal = 0;
+
+        for (Producto producto : productos) {
+            subtotal = subtotal + producto.calcularImporte();
+        }
+
+        return subtotal;
+    }
+
+    private double calcularIva(double subtotal) {
+        return subtotal * IVA;
+    }
+
+    private double calcularTotal(double subtotal, double iva) {
+        return subtotal + iva;
+    }
+
+    private void imprimirTicket(double subtotal, double iva, double total) {
         System.out.println("===== TICKET =====");
-        System.out.println("Cajero: " + n);
-        for (Producto p : ps) {
-            System.out.println(p.getNombre() + " x" + p.getCantidad()
-                    + " = " + String.format("%.2f", p.calcularImporte()) + " EUR");
-        }
-        System.out.println("------------------");
-        System.out.println("Subtotal: " + String.format("%.2f", subt) + " EUR");
-        System.out.println("IVA (21%): " + String.format("%.2f", iva) + " EUR");
-        System.out.println("TOTAL: " + String.format("%.2f", tot) + " EUR");
-        System.out.println("==================");
+        System.out.println("Cajero: " + nombreCajero);
 
-        c = c + 1;
-        t = t + tot;
-        ps.clear();
+        for (Producto producto : productos) {
+            System.out.println(producto.getNombre() + " x" + producto.getCantidad()
+                    + " = " + String.format("%.2f", producto.calcularImporte()) + " EUR");
+        }
+
+        System.out.println("------------------");
+        System.out.println("Subtotal: " + String.format("%.2f", subtotal) + " EUR");
+        System.out.println("IVA (21%): " + String.format("%.2f", iva) + " EUR");
+        System.out.println("TOTAL: " + String.format("%.2f", total) + " EUR");
+        System.out.println("==================");
+    }
+
+    private void registrarVenta(double total) {
+        ticketsEmitidos = ticketsEmitidos + 1;
+        totalDia = totalDia + total;
     }
 
     public void cierreCaja() {
-        double ivaRec = t - (t / (1 + 0.21));
+        double ivaRecaudado = calcularIvaRecaudado();
 
         System.out.println("===== CIERRE DE CAJA =====");
-        System.out.println("Cajero: " + n);
+        System.out.println("Cajero: " + nombreCajero);
         System.out.println("--------------------------");
-        System.out.println("Tickets emitidos: " + c);
-        System.out.println("Total facturado:  " + String.format("%.2f", t) + " EUR");
-        System.out.println("IVA recaudado:    " + String.format("%.2f", ivaRec) + " EUR");
+        System.out.println("Tickets emitidos: " + ticketsEmitidos);
+        System.out.println("Total facturado:  " + String.format("%.2f", totalDia) + " EUR");
+        System.out.println("IVA recaudado:    " + String.format("%.2f", ivaRecaudado) + " EUR");
         System.out.println("==========================");
     }
 
+    private double calcularIvaRecaudado() {
+        return totalDia - (totalDia / (1 + IVA));
+    }
+
     public boolean ticketVacio() {
-        return ps.isEmpty();
+        return productos.isEmpty();
     }
 
     public int getTicketsEmitidos() {
-        return c;
+        return ticketsEmitidos;
     }
 
     public double getTotalDia() {
-        return t;
+        return totalDia;
     }
 }
